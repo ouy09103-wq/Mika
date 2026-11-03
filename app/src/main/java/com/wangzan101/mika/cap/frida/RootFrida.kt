@@ -120,6 +120,8 @@ class RootFrida(context: Context, private val rootPort: () -> RootPort) : FridaP
         private const val GRACE_MS = 5_000L
         private const val UNSUPPORTED = "Frida ships for arm64 phones only; this device has no bundled Frida binaries."
 
+        private fun remote(bin: String) = "$REMOTE_DIR/$bin"
+
         /** 找 frida-server 进程:ps 的 ARGS 里带部署路径的才算,拿到它的 pid。 */
         private val PS_PIPELINE =
             "P=\$(ps -A -o PID,ARGS 2>/dev/null | grep -F '$REMOTE_DIR/${SERVER}' | grep -v grep | head -n 1 | sed 's/^ *//;s/[^0-9].*//'); "
