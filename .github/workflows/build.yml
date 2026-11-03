@@ -33,7 +33,7 @@ jobs:
       - name: Build (assemble debug + perf)
         run: |
           chmod +x gradlew
-          ./gradlew :core:testDebugUnitTest :app:assembleDebug :app:assemblePerf --stacktrace
+          ./gradlew :core:test :app:assembleDebug :app:assemblePerf --stacktrace
 
       - name: Upload APKs
         uses: actions/upload-artifact@v4
