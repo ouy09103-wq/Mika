@@ -787,7 +787,8 @@ class TaskRun(
                                 else -> RootResult.NotRun
                             }
                         }
-                    }
+                    },
+            )
             dispatcher = tools
             val agent = AgentLoop(
                 model, tools,
