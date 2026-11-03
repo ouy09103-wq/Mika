@@ -1234,10 +1234,13 @@ class TaskRun(
     /** root 命令端口 → frida 认识的 RootRunner;拒绝/没回话/不在都折成 NotRun(拒绝已由 root 侧记下)。 */
     private fun fridaRootRunner(
         r: com.wangzan101.mika.cap.phone.setup.RootControl,
-    ): com.wangzan101.mika.cap.frida.RootRunner = com.wangzan101.mika.cap.frida.RootRunner { command, timeoutMs ->
-        when (val run = RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) }.run(command, timeoutMs)) {
-            is RootRun.Done -> com.wangzan101.mika.cap.frida.RootResult.Done(run.exitCode, run.timedOut, run.stdout, run.stderr, run.droppedBytes, run.durationMs)
-            else -> com.wangzan101.mika.cap.frida.RootResult.NotRun
+    ): com.wangzan101.mika.cap.frida.RootRunner {
+        val commands = RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) }
+        return com.wangzan101.mika.cap.frida.RootRunner { command, timeoutMs ->
+            when (val run = commands.run(command, timeoutMs)) {
+                is RootRun.Done -> com.wangzan101.mika.cap.frida.RootResult.Done(run.exitCode, run.timedOut, run.stdout, run.stderr, run.droppedBytes, run.durationMs)
+                else -> com.wangzan101.mika.cap.frida.RootResult.NotRun
+            }
         }
     }
 
