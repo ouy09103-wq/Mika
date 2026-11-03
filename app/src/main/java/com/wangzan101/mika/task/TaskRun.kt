@@ -38,6 +38,7 @@ import com.wangzan101.mika.cap.phone.setup.RootShell
 import com.wangzan101.mika.cap.frida.RootFrida
 import com.wangzan101.mika.cap.frida.RootResult
 import com.wangzan101.mika.cap.root.RootCommands
+import com.wangzan101.mika.core.cap.root.RootRun
 import com.wangzan101.mika.cap.phone.a11y.launchableApps
 import com.wangzan101.mika.confirm.ConfirmationNotifier
 import com.wangzan101.mika.MikaApp
