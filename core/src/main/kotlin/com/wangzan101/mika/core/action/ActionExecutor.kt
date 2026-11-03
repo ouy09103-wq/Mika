@@ -130,7 +130,7 @@ class ActionExecutor(
         var d = decision.judge(call.name, args, origin)
         // 不在屏上、工具声明要问的一步(会改动东西的 root 命令):调用方问得到人就当场问,同意了按这次同意再判一次;
         // 问不到人(这次运行不能问、调用方不是模型单步)就不做,照被拦下记
-        val ask = if (d is Decision.Required || d == Decision.Denied) tools.approvalRisk(call.name, args)?.ask else null
+        val ask = if (d is Decision.Required || d is Decision.Denied) tools.approvalRisk(call.name, args)?.ask else null
         if (ask != null) {
             val hit = Irreversible(ask.action, ask.content)
             val answer = (if (d is Decision.Required) followUp.approve(ask) else null)
@@ -337,7 +337,6 @@ class ActionExecutor(
             recorder.result(origin.step, call.name, tools.verb(call.name), answer.content, tools.portRecord(call.name, args), null, null, 0, origin.policy.source, call.id)
         }
         return ActionOutcome.Refused(code, answer.content, before, hit)
-    }
     }
 
     private fun blocked(
