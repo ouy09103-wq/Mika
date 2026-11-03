@@ -781,14 +781,7 @@ class TaskRun(
                     ?.let { r -> RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) } },
                 // 内置 Frida:同 root 的开关;把 root 命令的端口适配成 frida 认识的 RootRunner(拒绝时 root 那边一并记下)
                 frida = phoneServices.shellManager.root.takeIf { !conditionCheck && it.commandsAllowed() }
-                    ?.let { r ->
-                        RootFrida(service) { command, timeoutMs ->
-                            when (val run = RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) }.run(command, timeoutMs)) {
-                                is RootRun.Done -> RootResult.Done(run.exitCode, run.timedOut, run.stdout, run.stderr, run.droppedBytes, run.durationMs)
-                                else -> RootResult.NotRun
-                            }
-                        }
-                    },
+                    ?.let { r -> RootFrida(service, fridaRootRunner(r)) },
             )
             dispatcher = tools
             val agent = AgentLoop(
@@ -1236,6 +1229,16 @@ class TaskRun(
             w.amount?.let { tr(R.string.payment_amount, it) },
             w.address?.let { tr(R.string.payment_address, it) },
         ).joinToString("\n").ifEmpty { null }
+    }
+
+    /** root 命令端口 → frida 认识的 RootRunner;拒绝/没回话/不在都折成 NotRun(拒绝已由 root 侧记下)。 */
+    private fun fridaRootRunner(
+        r: com.wangzan101.mika.cap.phone.setup.RootControl,
+    ): com.wangzan101.mika.cap.frida.RootRunner = com.wangzan101.mika.cap.frida.RootRunner { command, timeoutMs ->
+        when (val run = RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) }.run(command, timeoutMs)) {
+            is RootRun.Done -> com.wangzan101.mika.cap.frida.RootResult.Done(run.exitCode, run.timedOut, run.stdout, run.stderr, run.droppedBytes, run.durationMs)
+            else -> com.wangzan101.mika.cap.frida.RootResult.NotRun
+        }
     }
 
     private companion object {
