@@ -237,3 +237,12 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
+
+## Frida (frida-server, frida-inject)
+
+Bundled Frida binaries (frida-server and frida-inject for android-arm64), downloaded
+unmodified from the official Frida releases. Copyright © Frida contributors.
+Licensed under Frida's own license (see https://github.com/frida/frida/blob/main/COPYING
+— a BSD-style license with a special provision for commercially licensed products).
+Version 17.25.2. The binaries are used unmodified; the corresponding source is
+available at the same release page.

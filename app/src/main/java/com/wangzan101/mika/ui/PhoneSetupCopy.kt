@@ -274,6 +274,14 @@ object PhoneSetupCopy {
     val ROOT_COMMANDS_CONFIRM: String get() = tr(R.string.phone_root_commands_confirm)
     val ROOT_NOTE: String get() = tr(R.string.phone_root_note)
     val ROOT_OPTION: String get() = tr(R.string.phone_root_option)
+
+    // ---------- 内置 Frida ----------
+
+    val FRIDA_GROUP: String get() = tr(R.string.phone_frida_group)
+    val FRIDA_ROW: String get() = tr(R.string.phone_frida_row)
+    val FRIDA_ROW_SUB_ON: String get() = tr(R.string.phone_frida_row_sub_on)
+    val FRIDA_ROW_SUB_OFF: String get() = tr(R.string.phone_frida_row_sub_off)
+    val FRIDA_NOTE: String get() = tr(R.string.phone_frida_note)
     val ROOT_OPTION_BODY: String get() = tr(R.string.phone_root_option_body)
     val ROOT_PENDING: String get() = tr(R.string.phone_root_pending)
 

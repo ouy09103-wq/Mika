@@ -40,7 +40,7 @@ class ProcRunnerArgsTest {
 
     @Test fun envIsMinimal() {
         val env = ProcRunner.env(dirs, null, null, "conv1")
-        assertEquals(setOf("PROOT_LOADER", "PROOT_TMP_DIR", "HOME", "PATH", "LANG", "TMPDIR", "TZ", "MIKA_CONVERSATION"), env.keys)
+        assertEquals(setOf("PROOT_LOADER", "PROOT_TMP_DIR", "HOME", "PATH", "TERM", "COLORTERM", "LANG", "LC_ALL", "TMPDIR", "TZ", "MIKA_CONVERSATION"), env.keys)
         assertEquals("/data/app/lib/arm64/libproot_loader.so", env["PROOT_LOADER"])
         assertEquals("/data/m/cache/proot-tmp", env["PROOT_TMP_DIR"])
         assertTrue(env.keys.none { it == "LD_PRELOAD" || it.startsWith("ANDROID_") })

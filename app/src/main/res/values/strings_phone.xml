@@ -162,4 +162,10 @@
     <string name="phone_root_option_body">Mika asks su for permission once, then starts the helper. After a phone restart it starts it again by itself, without pairing.</string>
     <string name="phone_success_note_root">The helper was started with root. After a phone restart, Mika starts it again by itself.</string>
     <string name="phone_usage_note_root">Mika’s built-in helper was started with root and keeps running in the background, with or without Wi-Fi. After a phone restart, Mika starts it again with root by itself, with no pairing and no computer. If root is denied or removed, the Root group below says so.</string>
+
+    <string name="phone_frida_group">Built-in Frida</string>
+    <string name="phone_frida_row">Bundled Frida instrumentation</string>
+    <string name="phone_frida_row_sub_on">frida-server runs as root on demand; the agent gets frida_run when root commands are on.</string>
+    <string name="phone_frida_row_sub_off">Turn on “Allow Mika to run root commands” to use it.</string>
+    <string name="phone_frida_note">Mika ships Frida 17.25.2 (arm64). The binaries deploy to /data/local/tmp/mika-frida the first time the agent starts the server; start and inject steps ask you first.</string>
 </resources>

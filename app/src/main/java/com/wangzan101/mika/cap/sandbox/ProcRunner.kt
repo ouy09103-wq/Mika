@@ -48,7 +48,11 @@ object ProcRunner {
         put("PROOT_TMP_DIR", dirs.tmp.path)
         put("HOME", "/root")
         put("PATH", PATH)
+        // 终端环境(参考 Operit 的终端配置):交互式程序按 TERM 才出得了色、跑得了全屏界面
+        put("TERM", "xterm-256color")
+        put("COLORTERM", "truecolor")
         put("LANG", "C.UTF-8")
+        put("LC_ALL", "C.UTF-8")
         put("TMPDIR", "/tmp")
         // 每次启动都读取手机当前时区;Alpine 的 libc 不会读取 Android 的系统时区。
         put("TZ", timezone())

@@ -615,3 +615,9 @@ The command hit its time limit and was stopped. Use a larger timeoutSec (up to 3
 
 ## root.truncated
 The output was clipped to its head and tail. Narrow the command (grep, head, tail, a smaller query) to see the part you need.
+
+## frida.timed_out
+The Frida run hit its time limit and was stopped. Use a larger timeoutSec (up to 600), or make the script return sooner.
+
+## frida.truncated
+The output was clipped to its head and tail. Narrow the script (fewer console.log lines, shorter summaries) to see the part you need.

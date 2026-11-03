@@ -120,6 +120,8 @@ fun PhoneOpsScreen(
         }
         // 已 root 的手机:用 root 启动助手、允许 root 命令(找不到 su 时整组不显示)
         RootSwitches(helperRow = status.sdkInt >= Prerequisites.MIN_SDK)
+        // 内置 Frida(同样只在找得到 su 时显示;能不能用跟着「允许 root 命令」)
+        FridaSection()
     }
     if (confirmUnpair) {
         AlertDialog(

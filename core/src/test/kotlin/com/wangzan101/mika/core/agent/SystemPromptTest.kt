@@ -267,4 +267,4 @@ class SystemPromptAssemblyTest {
 
 /** 每段说明跟着哪组工具走。 */
 private val SECTION_TOOLS: Map<String, Set<String>>
-    get() = mapOf("phone" to setOf("phone_launch_app", "phone_list_apps"), "batch" to setOf("do_steps"), "web" to WEB_TOOLS, "sandbox" to SANDBOX_TOOLS)
+    get() = mapOf("phone" to setOf("phone_launch_app", "phone_list_apps"), "batch" to setOf("do_steps"), "web" to WEB_TOOLS, "sandbox" to SANDBOX_TOOLS, "frida" to setOf("frida_run"))
