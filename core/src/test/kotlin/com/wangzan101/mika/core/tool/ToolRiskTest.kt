@@ -46,9 +46,14 @@ class ToolRiskTest {
         val refused = oldWriting + oldSandbox + WEB_SCRIPT_TOOL +
             setOf("phone_find", "phone_collect", "phone_dialog", "phone_run", "phone_system_command", "schedule_task", "spawn_agent", "settings_set", "root_run_command", "frida_run")
         assertEquals(refused, allTools().filter { !it.readOnly }.map { it.name }.toSet())
-        // root 命令只在给了端口时登记:给一个,所有工具都在
+        // root / frida 只在给了端口时登记:各给一个,所有工具都在
         val d = toolDispatcher(FakeScreen(), root = object : com.wangzan101.mika.core.cap.root.RootPort {
             override suspend fun run(command: String, timeoutMs: Long) = com.wangzan101.mika.core.cap.root.RootRun.Unavailable
+        }, frida = object : com.wangzan101.mika.core.cap.frida.FridaPort {
+            override suspend fun status() = com.wangzan101.mika.core.cap.frida.FridaStatus(false, false, null, null)
+            override suspend fun start(force: Boolean) = com.wangzan101.mika.core.cap.frida.FridaOutcome.Unavailable("test")
+            override suspend fun stop() = com.wangzan101.mika.core.cap.frida.FridaOutcome.Unavailable("test")
+            override suspend fun inject(target: String, script: String, timeoutSec: Int) = com.wangzan101.mika.core.cap.frida.FridaOutcome.Unavailable("test")
         })
         for (name in names) {
             val r = d.executeRead(Part.ToolCall("c", name, "{}")).content

@@ -36,6 +36,7 @@ import com.wangzan101.mika.cap.phone.a11y.PhoneUnavailable
 import com.wangzan101.mika.cap.phone.PhoneServices
 import com.wangzan101.mika.cap.phone.setup.RootShell
 import com.wangzan101.mika.cap.frida.RootFrida
+import com.wangzan101.mika.cap.frida.RootResult
 import com.wangzan101.mika.cap.root.RootCommands
 import com.wangzan101.mika.cap.phone.a11y.launchableApps
 import com.wangzan101.mika.confirm.ConfirmationNotifier
@@ -777,9 +778,16 @@ class TaskRun(
                 // 已 root 的手机上用户打开了「允许 Mika 执行 root 命令」才登记 root 工具(子任务、条件检查不给)
                 root = phoneServices.shellManager.root.takeIf { !conditionCheck && it.commandsAllowed() }
                     ?.let { r -> RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) } },
-                // 内置 Frida:同 root 的开关;拒绝时 root 那边一并记下
+                // 内置 Frida:同 root 的开关;把 root 命令的端口适配成 frida 认识的 RootRunner(拒绝时 root 那边一并记下)
                 frida = phoneServices.shellManager.root.takeIf { !conditionCheck && it.commandsAllowed() }
-                    ?.let { r -> RootFrida(service) { RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) } } })
+                    ?.let { r ->
+                        RootFrida(service) { command, timeoutMs ->
+                            when (val run = RootCommands(RootShell::su) { a -> if (a == null) r.suGone() else r.commandsDenied(a) }.run(command, timeoutMs)) {
+                                is RootRun.Done -> RootResult.Done(run.exitCode, run.timedOut, run.stdout, run.stderr, run.droppedBytes, run.durationMs)
+                                else -> RootResult.NotRun
+                            }
+                        }
+                    }
             dispatcher = tools
             val agent = AgentLoop(
                 model, tools,

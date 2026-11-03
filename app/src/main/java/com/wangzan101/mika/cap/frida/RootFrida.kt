@@ -4,8 +4,6 @@ import android.content.Context
 import com.wangzan101.mika.core.cap.frida.FridaOutcome
 import com.wangzan101.mika.core.cap.frida.FridaPort
 import com.wangzan101.mika.core.cap.frida.FridaStatus
-import com.wangzan101.mika.core.cap.root.RootPort
-import com.wangzan101.mika.core.cap.root.RootRun
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -17,12 +15,23 @@ import java.io.File
  * frida-inject 每次注入起一个、跑完就退。所有 root 侧的事都经 [root](root 命令的端口)跑:
  * 用户没开「允许 Mika 执行 root 命令」时拿不到端口,工具不登记。
  */
-class RootFrida(context: Context, private val rootPort: () -> RootPort) : FridaPort {
+/**
+ * root 命令的最小端口:frida 不认识 root 能力(core 的依赖规矩,能力间不互引),
+ * 调用方把 root 命令的端口(或别的以 root 跑命令的实现)适配成这个。
+ */
+fun interface RootRunner {
+    suspend fun run(command: String, timeoutMs: Long): RootResult
+}
+
+/** 一次 root 命令的结局(frida 只认这几样;拒绝/没回话/不在都折成 Unavailable)。 */
+sealed interface RootResult {
+    data class Done(val exitCode: Int, val timedOut: Boolean, val stdout: String, val stderr: String, val droppedBytes: Long, val durationMs: Long) : RootResult
+    data object NotRun : RootResult
+}
+
+class RootFrida(context: Context, private val root: RootRunner) : FridaPort {
 
     private val nativeDir = context.applicationInfo.nativeLibraryDir
-
-    /** 每次操作建一份:RootCommands 无状态,经它拿到的拒绝回调由调用方(设置)处理。 */
-    private val root: RootPort get() = rootPort()
 
     private fun bundled(bin: String) = File(nativeDir, "libfrida_$bin.so")
 
@@ -34,7 +43,7 @@ class RootFrida(context: Context, private val rootPort: () -> RootPort) : FridaP
         val have = bundled(SERVER).exists() && bundled(INJECT).exists()
         if (!have) return@withContext FridaStatus(serverRunning = false, installed = false, version = null, pid = null)
         val r = root.run(STATUS_SCRIPT, SHORT_MS)
-        if (r !is RootRun.Done) return@withContext FridaStatus(serverRunning = false, installed = false, version = null, pid = null)
+        if (r !is RootResult.Done) return@withContext FridaStatus(serverRunning = false, installed = false, version = null, pid = null)
         val v = Regex("v='([^']*)'").find(r.stdout)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
         val pid = Regex("pid='([0-9]+)'").find(r.stdout)?.groupValues?.get(1)?.toLongOrNull()
         val installed = Regex("installed='([01])'").find(r.stdout)?.groupValues?.get(1) == "1"
@@ -88,26 +97,22 @@ class RootFrida(context: Context, private val rootPort: () -> RootPort) : FridaP
             "cp -f '$srcServer' ${remote(SERVER)} && cp -f '$srcInject' ${remote(INJECT)} && " +
             "chmod 755 ${remote(SERVER)} ${remote(INJECT)} && echo DEPLOY_OK"
         val r = root.run(cmd, DEPLOY_MS)
-        if (r is RootRun.Done && "DEPLOY_OK" in r.stdout) return null
+        if (r is RootResult.Done && "DEPLOY_OK" in r.stdout) return null
         return FridaOutcome.Unavailable(
             when (r) {
-                is RootRun.Done -> "Deploying Frida failed: ${(r.stderr.ifBlank { r.stdout }).take(200)}"
-                is RootRun.Denied -> "su refused: root access was denied or taken back."
-                is RootRun.NoAnswer -> "su did not answer; a permission prompt may be waiting on the phone."
-                is RootRun.Unavailable -> "This phone no longer has su."
+                is RootResult.Done -> "Deploying Frida failed: ${(r.stderr.ifBlank { r.stdout }).take(200)}"
+                RootResult.NotRun -> "su refused, did not answer, or is gone; Frida binaries were not deployed."
             },
         )
     }
 
-    /** 把一次 RootRun 折成 FridaOutcome。 */
-    private fun finish(r: RootRun): FridaOutcome = when (r) {
-        is RootRun.Done -> FridaOutcome.Done(
+    /** 把一次 RootResult 折成 FridaOutcome。 */
+    private fun finish(r: RootResult): FridaOutcome = when (r) {
+        is RootResult.Done -> FridaOutcome.Done(
             ok = r.exitCode == 0 && !r.timedOut, exitCode = r.exitCode, timedOut = r.timedOut, durationMs = r.durationMs,
             stdout = r.stdout, stderr = r.stderr, droppedBytes = r.droppedBytes,
         )
-        is RootRun.Denied -> FridaOutcome.Unavailable("su refused: root access was denied or taken back.")
-        is RootRun.NoAnswer -> FridaOutcome.Unavailable("su did not answer; a permission prompt may be waiting on the phone.")
-        is RootRun.Unavailable -> FridaOutcome.Unavailable("This phone no longer has su.")
+        RootResult.NotRun -> FridaOutcome.Unavailable("su refused, did not answer, or is gone.")
     }
 
     companion object {
