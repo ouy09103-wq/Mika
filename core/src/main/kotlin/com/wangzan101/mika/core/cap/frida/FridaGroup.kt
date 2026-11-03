@@ -8,6 +8,7 @@ import com.wangzan101.mika.core.observation.Observation
 import com.wangzan101.mika.core.observation.Place
 import com.wangzan101.mika.core.observation.Trust
 import com.wangzan101.mika.core.observation.Untrusted
+import com.wangzan101.mika.core.prompt.Feedback
 import com.wangzan101.mika.core.prompt.Prompts
 import com.wangzan101.mika.core.tool.AgentTool
 import com.wangzan101.mika.core.tool.Args
@@ -110,8 +111,8 @@ internal object FridaTool : AgentTool {
             val (out, outClipped) = OutputClip.clip(r.stdout)
             val (err, errClipped) = OutputClip.clip(r.stderr, head = 1_000, tail = 3_000)
             val hints = listOfNotNull(
-                com.wangzan101.mika.core.prompt.Feedback["frida.timed_out"].takeIf { r.timedOut },
-                com.wangzan101.mika.core.prompt.Feedback["frida.truncated"].takeIf { outClipped || errClipped || r.droppedBytes > 0 },
+                Feedback["frida.timed_out"].takeIf { r.timedOut },
+                Feedback["frida.truncated"].takeIf { outClipped || errClipped || r.droppedBytes > 0 },
             )
             ToolExecution(buildJsonObject {
                 put("ok", r.ok && !r.timedOut); put("exitCode", r.exitCode); put("timedOut", r.timedOut); put("durationMs", r.durationMs)
